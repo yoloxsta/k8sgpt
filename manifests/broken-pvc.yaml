@@ -1,0 +1,31 @@
+# Intentionally broken PVC for K8sGPT testing
+
+---
+# Issue: PVC requesting storage class that doesn't exist
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: broken-pvc-missing-storageclass
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nonexistent-storage-class  # This StorageClass doesn't exist
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# Issue: PVC with impossible storage request (too large for kind default)
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: broken-pvc-too-large
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1000Pi  # Unreasonably large

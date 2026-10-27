@@ -1,0 +1,95 @@
+# Intentionally broken deployment for K8sGPT testing
+# This deployment has several issues that K8sGPT should detect and explain
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broken-app
+  namespace: default
+  labels:
+    app: broken-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: broken-app
+  template:
+    metadata:
+      labels:
+        app: broken-app
+    spec:
+      containers:
+      # Issue 1: Image does not exist
+      - name: app
+        image: nginx:nonexistent-tag-v99.99.99
+        ports:
+        - containerPort: 80
+        
+      # Issue 2: Invalid probe configuration
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080  # Wrong port - app runs on 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          
+      # Issue 3: Resource limits too low (will cause OOMKilled)
+        resources:
+          requests:
+            memory: "1Mi"
+            cpu: "1m"
+          limits:
+            memory: "2Mi"
+            cpu: "2m"
+            
+      # Issue 4: Missing ConfigMap reference
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: missing-configmap
+              key: database_url
+              
+      # Issue 5: Missing Secret reference
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: missing-secret
+              key: api_key
+              
+      # Issue 6: ConfigMap volume that doesn't exist
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+          
+      volumes:
+      - name: config-volume
+        configMap:
+          name: another-missing-configmap
+---
+# Another broken deployment - crashloopbackoff
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crashing-app
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crashing-app
+  template:
+    metadata:
+      labels:
+        app: crashing-app
+    spec:
+      containers:
+      - name: crasher
+        image: busybox
+        # This command will always fail
+        command: ["/bin/sh", "-c", "exit 1"]
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"

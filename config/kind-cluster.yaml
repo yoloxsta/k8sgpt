@@ -1,0 +1,63 @@
+# Kind cluster configuration for K8sGPT lab
+# This creates a multi-node cluster suitable for testing K8sGPT
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: k8sgpt-lab
+
+# Configure cluster nodes
+nodes:
+  # Control plane node
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      # Map port 80 for ingress testing
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      # Map port 443 for HTTPS ingress
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+
+  # Worker node 1
+  - role: worker
+
+  # Worker node 2
+  - role: worker
+
+# Configure networking
+networking:
+  # Use kind's default CNI (kindnet)
+  # Disable default CNI to install Calico or Cilium if needed
+  # disableDefaultCNI: true
+  
+  # Pod subnet (default)
+  podSubnet: "10.244.0.0/16"
+  
+  # Service subnet (default)
+  serviceSubnet: "10.96.0.0/12"
+
+# Feature gates for advanced features
+featureGates:
+  # Enable any specific Kubernetes features if needed
+  # Example: "EphemeralContainers": true
+
+# Container runtime configuration
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
+      endpoint = ["http://kind-registry:5000"]
+
+# Optional: Configure kube-apiserver
+# kubeadmConfigPatches:
+#   - |
+#     kind: ClusterConfiguration
+#     apiServer:
+#       extraArgs:
+#         enable-admission-plugins: "NodeRestriction,PodSecurityPolicy"

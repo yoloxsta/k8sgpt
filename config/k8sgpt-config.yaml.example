@@ -1,0 +1,99 @@
+# K8sGPT Configuration for Azure OpenAI
+# Copy this file to k8sgpt-config.yaml and fill in your values
+
+# Azure OpenAI Configuration
+ai:
+  # Azure OpenAI provider
+  provider: azureopenai
+  
+  # Azure OpenAI endpoint (from Azure Portal)
+  # Format: https://<your-resource-name>.openai.azure.com/
+  endpoint: "https://YOUR-RESOURCE-NAME.openai.azure.com/"
+  
+  # Azure OpenAI API key (from Azure Portal → Keys and Endpoint)
+  api_key: "YOUR-API-KEY-HERE"
+  
+  # Model deployment name (the name you gave your deployment in Azure)
+  deployment_name: "gpt-4"
+  
+  # API version (use latest stable)
+  api_version: "2024-02-15-preview"
+  
+  # Optional: Model parameters
+  model: "gpt-4"
+  
+  # Temperature for responses
+  # IMPORTANT: For GPT-5 and newer models, only value 1 is supported
+  # For GPT-4 and GPT-3.5, you can use 0.0 - 2.0
+  temperature: 1
+  
+  # Max tokens for response
+  max_tokens: 2048
+
+# K8sGPT Analyzer Configuration
+analyzers:
+  # Core analyzers (enabled by default)
+  - pod
+  - service
+  - deployment
+  - replicaset
+  - statefulset
+  - daemonset
+  - pvc
+  - ingress
+  - hpa
+  - cronjob
+  - networkpolicy
+  - pdb
+  
+  # Optional security analyzers
+  # - trivy  # Requires trivy integration
+  
+  # Optional observability analyzers
+  # - prometheus  # Requires prometheus integration
+
+# Output configuration
+output:
+  # Output format: text, json, yaml
+  format: text
+  
+  # Show detailed explanations
+  explain: true
+  
+  # Include additional context in output
+  anonymous: false
+
+# Filtering options
+filters:
+  # Include only specific namespaces (empty = all namespaces)
+  namespaces: []
+  # Example:
+  # namespaces:
+  #   - default
+  #   - production
+  
+  # Exclude specific namespaces
+  exclude_namespaces: []
+  # Example:
+  # exclude_namespaces:
+  #   - kube-system
+  #   - kube-public
+  
+  # Minimum severity level: low, medium, high, critical
+  severity: low
+
+# Cache configuration
+cache:
+  # Enable caching of analysis results
+  enable: true
+  
+  # Cache TTL in seconds (default: 300 = 5 minutes)
+  ttl: 300
+
+# Logging configuration
+logging:
+  # Log level: debug, info, warn, error
+  level: info
+  
+  # Log file path (optional)
+  # file: /var/log/k8sgpt.log

@@ -1,0 +1,75 @@
+# Intentionally broken ingress for K8sGPT testing
+
+---
+# Issue: Ingress with non-existent backend service
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: broken-ingress-missing-backend
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: broken-app.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nonexistent-service  # This service doesn't exist
+            port:
+              number: 80
+
+---
+# Issue: Ingress with missing TLS secret
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: broken-ingress-missing-tls
+  namespace: default
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - secure-app.local
+    secretName: missing-tls-secret  # This secret doesn't exist
+  rules:
+  - host: secure-app.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: broken-service-no-selector
+            port:
+              number: 80
+
+---
+# Issue: Ingress with invalid annotation
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: broken-ingress-bad-annotation
+  namespace: default
+  annotations:
+    # Invalid annotation value
+    nginx.ingress.kubernetes.io/ssl-redirect: "invalid-boolean"
+    nginx.ingress.kubernetes.io/custom-bad-config: "this-does-not-exist"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: bad-annotation.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: broken-service-no-selector
+            port:
+              number: 80

@@ -1,0 +1,62 @@
+# Intentionally broken services for K8sGPT testing
+
+---
+# Issue: Service selector doesn't match any pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: broken-service-no-selector
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: nonexistent-app  # No pods match this selector
+  ports:
+  - port: 80
+    targetPort: 8080
+
+---
+# Issue: Service with missing endpoints
+apiVersion: v1
+kind: Service
+metadata:
+  name: broken-service-missing-endpoints
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: missing-pods
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+# Issue: Service referencing a non-existent service account
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-with-missing-sa
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: some-app
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# Pod with missing service account to test service account issues
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-missing-sa
+  namespace: default
+spec:
+  serviceAccountName: nonexistent-service-account
+  containers:
+  - name: app
+    image: nginx:latest
+    ports:
+    - containerPort: 80

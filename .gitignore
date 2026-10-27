@@ -1,0 +1,45 @@
+# K8sGPT Lab - Git Ignore File
+
+# Configuration files with credentials
+config/k8sgpt-config.yaml
+
+# K8sGPT local configuration
+.k8sgpt.yaml
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Credentials and secrets
+*-credentials.yaml
+*-secret.yaml
+secrets/
+
+# Backup files
+*.backup
+*.bak
