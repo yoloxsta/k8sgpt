@@ -524,14 +524,116 @@ newgrp docker
 2. Check available resources: `free -h`
 3. Clean up and retry: `kind delete cluster --name k8sgpt-lab`
 
-### Ollama Memory Issues
+### Memory Issues
 
-**Problem:** Ollama runs out of memory
+**Problem:** VM runs out of memory (3.7GB RAM is insufficient)
+
+**Symptoms:**
+```bash
+$ free -h
+               total        used        free      shared  buff/cache   available
+Mem:           3.7Gi       3.6Gi       103Mi        29Mi       351Mi       181Mi
+Swap:             0B          0B          0B
+```
+
+**Root Cause:** 
+- Kind cluster: ~1.5 GB
+- Ollama (llama3.2): ~2 GB
+- K8sGPT: ~100 MB
+- System: ~500 MB
+- **Total needed: ~4 GB** (VM only has 3.7 GB)
 
 **Solutions:**
-1. Use smaller model: `ollama pull llama3.2`
-2. Increase VM size
-3. Monitor memory: `htop`
+
+**Option 1: Add Swap Space (Recommended)**
+
+```bash
+# Check disk space first
+df -h
+
+# Create 2-4GB swap file
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Make permanent
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Verify
+free -h
+```
+
+Expected result:
+```
+               total        used        free      shared  buff/cache   available
+Mem:           3.7Gi       1.2Gi       2.3Gi        37Mi       469Mi       2.5Gi
+Swap:          3.6Gi          0B       3.6Gi
+```
+
+**Option 2: Stop Ollama When Not in Use**
+
+```bash
+# Stop Ollama (saves ~2GB RAM)
+sudo systemctl stop ollama
+
+# Start only when analyzing
+sudo systemctl start ollama
+k8sgpt analyze --explain
+
+# Stop again
+sudo systemctl stop ollama
+```
+
+**Option 3: Use Smaller Model**
+
+```bash
+# Remove large model
+ollama rm llama3.2
+
+# Use smaller model (1.5GB instead of 2GB)
+ollama pull phi3
+
+# Update K8sGPT
+k8sgpt auth remove -b ollama
+k8sgpt auth add --backend ollama --model phi3
+k8sgpt auth default --provider ollama
+```
+
+**Option 4: Upgrade VM Size (Permanent Fix)**
+
+```bash
+# Stop VM
+az vm deallocate --resource-group k8sgpt-lab --name k8sgpt-vm
+
+# Resize to 8GB RAM
+az vm resize --resource-group k8sgpt-lab --name k8sgpt-vm --size Standard_D4s_v3
+
+# Start VM
+az vm start --resource-group k8sgpt-lab --name k8sgpt-vm
+```
+
+**Memory Management Best Practices:**
+
+```bash
+# Monitor memory in real-time
+watch -n 1 free -h
+
+# Check what's using memory
+htop
+
+# Clean up Docker (if disk is also full)
+docker system prune -a -f --volumes
+
+# Clean apt cache
+sudo apt-get clean
+sudo apt-get autoremove -y
+```
+
+**Recommended Configuration:**
+- **Minimum:** 3.7GB RAM + 4GB swap
+- **Recommended:** 8GB RAM (Standard_D4s_v3)
+- **Optimal:** 16GB RAM for larger models
 
 ### Azure OpenAI Temperature Error
 
