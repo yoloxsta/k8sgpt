@@ -82,12 +82,10 @@ fi
 # Install K8sGPT
 echo "[6/6] Installing K8sGPT..."
 if ! command -v k8sgpt &> /dev/null; then
-  # Download latest K8sGPT release
-  curl -sLO https://github.com/k8sgpt-ai/k8sgpt/releases/latest/download/k8sgpt_linux_amd64.tar.gz
-  tar -xzf k8sgpt_linux_amd64.tar.gz
-  chmod +x k8sgpt
-  mv k8sgpt /usr/local/bin/
-  rm k8sgpt_linux_amd64.tar.gz
+  # Download K8sGPT DEB package (more reliable than tarball)
+  curl -LO https://github.com/k8sgpt-ai/k8sgpt/releases/download/v0.3.48/k8sgpt_amd64.deb
+  dpkg -i k8sgpt_amd64.deb
+  rm k8sgpt_amd64.deb
   
   # Enable bash completion
   k8sgpt completion bash | tee /etc/bash_completion.d/k8sgpt > /dev/null
@@ -106,9 +104,14 @@ echo "  kubectl:  $(kubectl version --client --short 2>/dev/null || kubectl vers
 echo "  kind:     $(kind version)"
 echo "  k8sgpt:   $(k8sgpt version)"
 echo ""
+echo "IMPORTANT: Docker group changes require session restart"
+echo "Run: newgrp docker"
+echo ""
 echo "Next steps:"
-echo "1. If you ran this with sudo, log out and back in for docker group changes"
+echo "1. Run: newgrp docker"
 echo "2. Create kind cluster: ./scripts/create-cluster.sh"
-echo "3. Configure K8sGPT with Azure OpenAI: Edit config/k8sgpt-config.yaml"
+echo "3. Configure K8sGPT with your preferred AI backend:"
+echo "   - Azure OpenAI: Edit config/k8sgpt-config.yaml"
+echo "   - Ollama (local): curl -fsSL https://ollama.com/install.sh | sh"
 echo "4. Initialize K8sGPT: ./scripts/setup-k8sgpt.sh"
 echo ""
