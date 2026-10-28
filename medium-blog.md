@@ -46,35 +46,13 @@ ssh azureuser@<public-ip>
 
 ### Prerequisites Installation
 
-ဒီနေရာမှာတော့ တခြားသူတွေ ရေးထားတဲ့ script တွေ မသုံးခင် ကိုယ်တိုင်ရေးဖို့ ဆုံးဖြတ်ခဲ့တယ်။
-
 Docker, kubectl, kind, K8sGPT - ဒီလေးခုလုံး လိုတယ်။ တစ်ခုချင်းစီ install လုပ်ခဲ့တယ်။
 
-Docker install လုပ်တဲ့အခါ ဒါမျိုး output ပေါ်လာတယ်:
-```
-Added azureuser to docker group. You may need to log out and back in.
-```
-
-ဒါပေမဲ့ ကျွန်တော် ဂရုမစိုက်ဘဲ နောက်ဆက်တွဲ command တွေ run နေခဲ့တယ်။ နောက်မှ ဒါက အရေးကြီးတယ်ဆိုတာ သိခဲ့ရတယ်။
-
-K8sGPT install လုပ်တဲ့အခါမှာတော့ ပြဿနာတစ်ခု စတွေ့ခဲ့ရပြီးပြီ:
-
-```
-gzip: stdin: not in gzip format
-tar: Child returned status 1
-tar: Error is not recoverable: exiting now
-```
-
-Download လုပ်ထားတဲ့ tar.gz file က corrupt ဖြစ်နေတယ်။ နောက်တစ်ကြိမ် download လုပ်ပြန်တယ်။ အတူတူပဲ။
-
-Google မှာ search လုပ်တယ်။ Stack Overflow မှာ တခြားသူတွေက DEB package သုံးပါတယ် ပြောထားတယ်။
 
 ```bash
 curl -LO https://github.com/k8sgpt-ai/k8sgpt/releases/download/v0.3.48/k8sgpt_amd64.deb
 sudo dpkg -i k8sgpt_amd64.deb
 ```
-
-ဒါမှ အလုပ်လုပ်ခဲ့တယ်။
 
 ---
 
@@ -173,26 +151,6 @@ Calculate လုပ်ကြည့်တယ်:
 VM မှာတော့ 3.7GB ပဲရှိတယ်။ 
 
 ဒါက memory မလုံလောက်ဘူး။
-
----
-
-## The Swap Solution
-
-Google မှာ "Linux swap space" ဆိုပြီး search လုပ်တယ်။
-
-Swap space ဆိုတာ hard disk ပေါ်မှာ RAM လို အသုံးပြုတဲ့နေရာတစ်ခုပါ။ RAM ပြည့်သွားရင် အသုံးမပြုတော့တဲ့ data တွေကို swap မှာ ခေတ္တသိမ်းထားတယ်။ လိုအပ်ရင် RAM ကို ပြန်ရွှေ့ပေးတယ်။ RAM ထက်နှေးပေမဲ့ အလုပ်တော့လုပ်တယ်။ အနည်းဆုံး system crash တော့ မဖြစ်တော့ဘူး။
-
-Swap file တစ်ခု ဖန်တီးခဲ့တယ်:
-
-```bash
-sudo fallocate -l 4G /swapfile
-```
-
-Output: `fallocate: fallocate failed: No space left on device`
-
-ဒါပေမဲ့ disk မှာလည်း နေရာမလုံလောက်ဘူး။
-
-ဒါနဲ့ 2GB အထိ လျှော့ကြည့်တယ်:
 
 ```bash
 sudo fallocate -l 2G /swapfile
